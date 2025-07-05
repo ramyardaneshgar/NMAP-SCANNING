@@ -17,7 +17,7 @@ sudo nmap -sN <target-ip>
 
 I ran this scan from the AttackBox after confirming that I had sudo privileges (since raw packet crafting requires elevated permissions). The result showed **7 ports listed as "open|filtered"**, indicating that those ports did not reply with a TCP RST. Since closed ports do return RSTs, I concluded these must be open or being dropped by a firewall silently.
 
-**Technical Insight:** This scan is particularly useful in evading **stateless packet filters**, which primarily detect TCP segments with the SYN flag set. Since the Null scan does not use SYN, such filters fail to recognize it as a connection attempt.
+This scan is particularly useful in evading **stateless packet filters**, which primarily detect TCP segments with the SYN flag set. Since the Null scan does not use SYN, such filters fail to recognize it as a connection attempt.
 
 ---
 
@@ -35,7 +35,7 @@ sudo nmap -sF <target-ip>
 
 This returned the same 7 "open|filtered" ports as the Null scan. Since both scans rely on non-standard flag behavior, the results were consistent.
 
-**Technical Insight:** Like the Null scan, FIN scans exploit the **inconsistent handling of unexpected TCP flags** by operating systems. This method can bypass **non-stateful firewalls** and uncover inconsistencies in packet filtering logic.
+Like the Null scan, FIN scans exploit the **inconsistent handling of unexpected TCP flags** by operating systems. This method can bypass **non-stateful firewalls** and uncover inconsistencies in packet filtering logic.
 
 ---
 
@@ -53,7 +53,7 @@ sudo nmap -sX <target-ip>
 
 The results again reported **7 ports as open|filtered**. These three scans (Null, FIN, Xmas) are functionally equivalent but vary in how they trigger firewalls or IDS systems.
 
-**Technical Insight:** These scans are ideal for **firewall evasion**, especially against older IDS signatures that detect only SYN-based scans. However, results are ambiguous due to lack of differentiation between "open" and "filtered."
+These scans are ideal for **firewall evasion**, especially against older IDS signatures that detect only SYN-based scans. However, results are ambiguous due to lack of differentiation between "open" and "filtered."
 
 ---
 
@@ -71,7 +71,7 @@ sudo nmap -sM <target-ip>
 
 This scan returned uniform RSTs, indicating that the target system was modern and not vulnerable to this fingerprinting method. Therefore, I could not use this scan to enumerate open ports on the given host.
 
-**Technical Insight:** This scan is valuable in niche scenarios—specifically for **OS fingerprinting** or identifying legacy infrastructure within mixed environments.
+This scan is valuable in niche scenarios—specifically for **OS fingerprinting** or identifying legacy infrastructure within mixed environments.
 
 ---
 
@@ -89,7 +89,7 @@ sudo nmap -sA <target-ip>
 
 Initially, I received uniform RSTs, suggesting that all ports were unfiltered (firewall not enabled). However, after a firewall ruleset was applied on the target VM, I re-ran the ACK scan and identified **3 ports returned RSTs**, meaning they were **unfiltered** while others were filtered.
 
-**Technical Insight:** This scan is excellent for **infrastructure reconnaissance**—it distinguishes **stateful firewalls** from packet-filtering ACLs and reveals **which ports bypass perimeter controls**.
+This scan is excellent for **infrastructure reconnaissance**—it distinguishes **stateful firewalls** from packet-filtering ACLs and reveals **which ports bypass perimeter controls**.
 
 ---
 
@@ -107,7 +107,7 @@ sudo nmap -sW <target-ip>
 
 The output marked the same three ports as **closed**, which contradicted the earlier ACK scan (that marked them as unfiltered). This discrepancy highlighted subtle differences in how the system constructed TCP headers—indicating possibly inconsistent firewall policy enforcement.
 
-**Technical Insight:** The TCP Window scan is primarily used for **indirect port status inference** and **system fingerprinting**. It’s more effective when ACK scans return inconclusive results or when inspecting edge cases.
+The TCP Window scan is primarily used for **indirect port status inference** and **system fingerprinting**. It’s more effective when ACK scans return inconclusive results or when inspecting edge cases.
 
 ---
 
@@ -123,7 +123,7 @@ sudo nmap --scanflags RSTSYNFIN <target-ip>
 
 I chose this combination to test how the system and any intermediate security controls handle malformed packets. The results showed all ports as closed—no surprises, but useful to understand how the system adheres to RFC-compliant flag behavior.
 
-**Technical Insight:** Custom scans are useful in **red teaming** to simulate attacker behavior and validate **IDS/IPS resilience against non-standard protocol manipulation.**
+Custom scans are useful in **red teaming** to simulate attacker behavior and validate **IDS/IPS resilience against non-standard protocol manipulation.**
 
 ---
 
@@ -138,8 +138,8 @@ sudo nmap -e eth0 -Pn -S 10.10.10.11 <target-ip>
 ```
 
 Without a proper sniffing setup, I could not observe the RST replies—highlighting a real-world limitation of spoofing unless you control the spoofed IP or are on a shared broadcast domain.
-
-**Technical Insight:** Spoofing is viable only when **response capture is guaranteed**, such as on the same subnet, or with MITM positioning. It's useful for **attribution obfuscation** during advanced assessments.
+ 
+Spoofing is viable only when **response capture is guaranteed**, such as on the same subnet, or with MITM positioning. It's useful for **attribution obfuscation** during advanced assessments.
 
 ---
 
@@ -155,7 +155,7 @@ sudo nmap --spoof-mac 00:11:22:33:44:55 <target-ip>
 
 The scan succeeded with no access denial, indicating no MAC-based controls in place.
 
-**Technical Insight:** This technique is relevant in **Wi-Fi security assessments** or against **802.1X MAC filtering** where attackers attempt to impersonate whitelisted devices.
+This technique is relevant in **Wi-Fi security assessments** or against **802.1X MAC filtering** where attackers attempt to impersonate whitelisted devices.
 
 ---
 
@@ -171,7 +171,7 @@ sudo nmap -D 192.168.1.10,192.168.1.11,ME <target-ip>
 
 Log analysis on the target side showed interleaved scans from decoys and my real IP. This makes correlation more difficult unless full packet capture or correlation with MAC address exists.
 
-**Technical Insight:** Decoys are effective for **log poisoning** and **signature obfuscation**, particularly in **multi-stage intrusion campaigns**.
+Decoys are effective for **log poisoning** and **signature obfuscation**, particularly in **multi-stage intrusion campaigns**.
 
 ---
 
@@ -187,7 +187,7 @@ sudo nmap -sS -p 80 -f <target-ip>
 
 Each packet fragment was 8 bytes or less. I confirmed with Wireshark that the system reassembled them, and port 80 returned SYN-ACK successfully.
 
-**Technical Insight:** Packet fragmentation is a **stealth technique** to evade **deep packet inspection**. However, some security appliances reassemble packets before inspection—so this is most effective against older or misconfigured systems.
+Packet fragmentation is a **stealth technique** to evade **deep packet inspection**. However, some security appliances reassemble packets before inspection—so this is most effective against older or misconfigured systems.
 
 ---
 
@@ -203,7 +203,7 @@ sudo nmap -sI 10.10.5.5 <target-ip>
 
 Using a low-traffic printer as the zombie, I recorded the initial IP ID, launched the spoofed probe, then sent another SYN to the zombie to observe IP ID delta. A delta of `2` indicated the target’s port was **open** (because the zombie sent a RST to SYN-ACK).
 
-**Technical Insight:** The Idle Scan is a **zero-interaction reconnaissance** method that leaves **no footprint on the target**, ideal for **clandestine assessments**.
+The Idle Scan is a **zero-interaction reconnaissance** method that leaves **no footprint on the target**, ideal for **clandestine assessments**.
 
 ---
 
